@@ -1,53 +1,44 @@
-# Training Attendance App – Project Idea
+﻿# Training Attendance App - DEMO Project Idea
 
 ## 1. Problem
 
-Small-group fitness trainers often need to manage several administrative activities: tracking attendance, managing memberships, recording payments and arranging replacement sessions for missed classes.
-
-When this information is maintained manually or across separate tools, it can be time-consuming and difficult to keep accurate.
+Small-group fitness trainers need a clear way to track who participates in each group and who attended each session. Maintaining these records manually can make it harder to keep participant lists and attendance history accurate.
 
 ## 2. Target User
 
-The primary user is an independent fitness trainer managing small training groups of up to six regular participants.
+The DEMO is intended to show how an independent fitness trainer could manage two small training groups of up to six participants each.
 
-The first MVP version will have one user role: **Trainer**.
-
-Training participants will not have individual accounts.
+It is a demonstration only: it has no login, registration, user accounts or Supabase Auth. All participant information must be fictional.
 
 ## 3. Current Process
 
-The trainer may use spreadsheets, calendars, messages or handwritten notes to track participants, attendance, membership validity and payments.
-
-Information stored in separate places can make it difficult to see the current status of each participant.
+A trainer may use spreadsheets, calendars, messages or handwritten notes to track group membership and attendance. Keeping the information in multiple places can make it harder to review current group rosters and past attendance.
 
 ## 4. Proposed Solution
 
-Training Attendance App is a web application that allows a trainer to:
+Training Attendance App DEMO is a small web application that allows the user to:
 
-- Manage training groups and participants.
-- Assign and track training memberships.
-- Record attendance for individual sessions.
-- Manage replacement sessions for missed classes.
-- Track membership payments and due dates.
-- View relevant participant and group information in one place.
+- View two predefined groups: Monday / Wednesday and Tuesday / Thursday.
+- Create, view, edit and delete fictional participant records.
+- Assign each participant to exactly one group, with a maximum of six participants per group.
+- Create, view, edit and delete attendance records by participant and date.
+
+The database contains only three tables: `groups`, `participants` and `attendance`.
 
 ## 5. Value Proposition
 
-The application aims to reduce administrative work, improve data accuracy and provide a clear overview of training activities.
-
-It will help the trainer spend less time maintaining records and more time focusing on training participants.
+The DEMO illustrates a focused way to manage group rosters and attendance in one place, with clear capacity limits and attendance history.
 
 ## 6. Main User Scenario
 
-1. The trainer signs in to the application.
-2. The trainer selects a scheduled training session.
-3. The application displays the participants registered for that session.
-4. The trainer records attendance.
-5. The application updates attendance and membership information.
-6. The trainer reviews membership validity and payment status.
+1. The user opens the demo; no sign-in or account is required.
+2. The user views the two predefined training groups and their participants.
+3. The user creates or edits fictional participant records, assigning each participant to one group.
+4. The user records attendance for a participant and date.
+5. The user reviews or corrects attendance history.
 
-## 7. MVP Scope
+## 7. DEMO Scope and Data Safety
 
-The first version focuses on essential trainer-facing functionality.
+The DEMO includes participant CRUD and attendance CRUD for fictional data only. Memberships, payments, notifications and replacement sessions are out of scope. Group records are predefined and read-only.
 
-Participant self-service, automated notifications, online payments and integrations with external calendars are excluded from the MVP.
+Public anonymous write access to Supabase is not permitted. A safe demo data-access approach must be selected before implementing database CRUD. It must prevent anonymous users from writing to Supabase and must not expose privileged credentials in frontend code. Until the approach is selected, database CRUD should not be implemented.

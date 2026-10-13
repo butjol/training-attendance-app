@@ -1,85 +1,69 @@
-﻿# Training Attendance App - MVP Specification
+﻿# Training Attendance App - DEMO Specification
 
-## 1. MVP Goal
+## 1. DEMO Goal
 
-Build a simple web application that helps an independent fitness trainer manage two training groups, participants and attendance.
+Build a simple demo web application for managing two training groups, participants and attendance using fictional data only.
 
-The application will use React, Vite, CSS and Supabase. Its database contains three tables: `groups`, `participants` and `attendance`. Trainer authentication is managed separately through Supabase Auth.
-
-The first MVP version supports one user role: Trainer.
+The application will use React, Vite, CSS and Supabase. Its database contains only three tables: `groups`, `participants` and `attendance`. The DEMO has no login, registration, user accounts or Supabase Auth.
 
 ## 2. Functional Requirements
 
-### FR-01: Trainer Authentication
+### FR-01: Training Groups
 
 **Priority: Must have**
 
-The trainer can securely sign in and sign out using Supabase Auth.
-
-**Acceptance Criteria**
-- The trainer can sign in using email and password.
-- Invalid login credentials display an error message.
-- Unauthenticated users cannot access protected application data.
-- The trainer can sign out.
-
-### FR-02: Training Groups
-
-**Priority: Must have**
-
-The trainer can view the two predefined training groups:
+The demo displays two predefined training groups:
 
 - Monday / Wednesday
 - Tuesday / Thursday
 
-Groups are predefined and are not managed as editable records in the MVP.
+Groups are predefined and are not editable in the demo.
 
 **Acceptance Criteria**
 - Both predefined groups are available in the application.
-- The trainer can view each group and the participants assigned to it.
+- The application displays the participants assigned to each group.
 - Each group can contain no more than six participants.
-- Group capacity is enforced when creating or editing participant assignments.
+- The group capacity is enforced when creating or changing participant assignments.
 
-### FR-03: Participant Management
-
-**Priority: Must have**
-
-The trainer can create and manage participant records, assigning each participant to exactly one training group.
-
-**Acceptance Criteria**
-- The trainer can create a participant with a required name, optional phone number and one group assignment.
-- The trainer can view the participant list and each participant's group.
-- The trainer can edit participant details and change the group assignment.
-- The trainer can delete a participant after confirmation.
-- Each participant belongs to exactly one group at all times.
-- A group assignment cannot be created or changed if it would exceed that group's capacity of six.
-- Participant and group assignment data is stored in Supabase.
-
-### FR-04: Attendance Management
+### FR-02: Participant Management
 
 **Priority: Must have**
 
-The trainer can create and manage attendance records for individual participants and dates.
+The demo supports full participant CRUD. Every participant is assigned to exactly one group.
 
 **Acceptance Criteria**
-- The trainer can create an attendance record for a participant and session date, marking the participant Present or Absent.
-- The trainer can view attendance records by participant and date.
-- The trainer can edit an existing attendance record, including its date and attendance status.
-- The trainer can delete an attendance record.
+- The user can create a participant with a required name, optional phone number and one group assignment.
+- The user can view the participant list and each participant's group.
+- The user can edit participant details and change the group assignment.
+- The user can delete a participant after confirmation.
+- Every participant belongs to exactly one group.
+- Creating or changing an assignment cannot make a group exceed six participants.
+- All participant data used in the demo is fictional.
+
+### FR-03: Attendance Management
+
+**Priority: Must have**
+
+The demo supports full attendance CRUD for individual participants and dates.
+
+**Acceptance Criteria**
+- The user can create an attendance record for a participant and session date, marking the participant Present or Absent.
+- The user can view attendance records by participant and date.
+- The user can edit an existing attendance record, including its date and status.
+- The user can delete an attendance record.
 - A participant can have no more than one attendance record for the same date.
-- Attendance data is stored in Supabase.
 
 ## 3. Out of Scope
 
-The following features are excluded from the MVP:
+The following features are excluded from the DEMO:
 
-- Membership management.
+- Login, registration, user accounts and Supabase Auth.
+- Memberships and membership validity tracking.
 - Payment tracking or online payment processing.
+- Notifications.
 - Replacement sessions in other groups.
-- Automatic SMS, email or other notifications.
-- Participant accounts and self-service.
-- Automatic calculation of remaining sessions.
-- Advanced reporting and analytics.
-- External calendar integrations.
+- Participant self-service.
+- Analytics and external calendar integrations.
 - Creating, editing or deleting training groups; the two groups are predefined.
 
 ## 4. Non-Functional Requirements
@@ -89,28 +73,28 @@ The following features are excluded from the MVP:
 - The application should work on desktop and mobile screens.
 - Forms should display clear validation and error messages.
 
-### Security
-- Authentication will use Supabase Auth.
-- Database access will be protected using Row Level Security (RLS).
-- Sensitive service-role keys must never be exposed in frontend code.
-- Real participant data must not be used in public documentation or screenshots.
+### Security and Demo Data
+- Use fictional participant names and contact details only in the demo, seed data, screenshots and documentation.
+- Public anonymous write access to Supabase is not permitted.
+- A safe demo data-access approach must be selected before implementing database CRUD. The choice must prevent anonymous users from writing to the database and must not expose privileged service credentials in frontend code.
+- Do not implement database CRUD until this access approach is selected.
 
 ### Data Management
-- Application data will be stored in Supabase using the `groups`, `participants` and `attendance` tables.
-- Required create, read, update and delete operations will be implemented for participants and attendance records.
+- The data model contains only `groups`, `participants` and `attendance`.
+- CRUD operations are required for participants and attendance records; groups are predefined.
 - The application should handle loading, success and error states.
 
-## 5. MVP Completion Criteria
+## 5. DEMO Completion Criteria
 
-The MVP is considered complete when:
+The DEMO is considered complete when:
 
-- The trainer can securely sign in and sign out using Supabase Auth.
-- Unauthenticated users cannot access protected application data.
-- The trainer can view the two predefined groups: Monday / Wednesday and Tuesday / Thursday.
-- The trainer can create, view, edit and delete participants.
+- The application has no login, registration, user accounts or Supabase Auth flow.
+- The application displays the two predefined groups: Monday / Wednesday and Tuesday / Thursday.
+- The trainer can create, view, edit and delete participants using fictional data only.
 - Every participant is assigned to exactly one group.
 - Neither group can exceed six participants, including when a participant is created or reassigned.
 - The trainer can create, view, edit and delete attendance records by participant and date.
-- The application prevents duplicate attendance records for the same participant and date.
-- Participant and attendance data persists in Supabase after page refresh.
-- The application uses only the three MVP data tables: `groups`, `participants` and `attendance`; trainer credentials are managed by Supabase Auth.
+- Duplicate attendance records for the same participant and date are prevented.
+- Data persists after page refresh using the selected safe data-access approach.
+- The database contains only the three tables `groups`, `participants` and `attendance`.
+- Public anonymous Supabase writes are disabled, and the safe database CRUD approach has been selected before database CRUD is implemented.
