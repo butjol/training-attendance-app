@@ -18,6 +18,9 @@ function App() {
   const [editingPhone, setEditingPhone] = useState('')
   const [savingEdit, setSavingEdit] = useState(false)
   const [editMessage, setEditMessage] = useState(null)
+  const [deleteTarget, setDeleteTarget] = useState(null)
+  const [deletingParticipant, setDeletingParticipant] = useState(false)
+  const [deleteMessage, setDeleteMessage] = useState(null)
   const [groupsLoading, setGroupsLoading] = useState(true)
   const [participantsLoading, setParticipantsLoading] = useState(false)
   const [attendanceLoading, setAttendanceLoading] = useState(false)
@@ -159,6 +162,43 @@ function App() {
     setEditingName('')
     setEditingPhone('')
     setSavingEdit(false)
+  }
+
+  async function handleDeleteParticipant() {
+    if (!deleteTarget || deletingParticipant) return
+
+    setDeletingParticipant(true)
+    setDeleteMessage(null)
+
+    const { error } = await supabase
+      .from('participants')
+      .delete()
+      .eq('id', deleteTarget.id)
+
+    if (error) {
+      setDeleteMessage({ type: 'error', text: `Couldn’t delete participant: ${error.message}` })
+      setDeletingParticipant(false)
+      setDeleteTarget(null)
+      return
+    }
+
+    const deletedName = deleteTarget.name
+    setDeleteTarget(null)
+    setDeletingParticipant(false)
+
+    const { data, error: refreshError } = await supabase
+      .from('participants')
+      .select('id, name, phone')
+      .eq('group_id', selectedGroup.id)
+
+    if (refreshError) {
+      setParticipantsError(refreshError.message)
+      setDeleteMessage({ type: 'error', text: `Participant deleted, but the list could not refresh: ${refreshError.message}` })
+    } else {
+      setParticipants(data ?? [])
+      setAttendance((current) => current.filter((record) => record.participant_id !== deleteTarget.id))
+      setDeleteMessage({ type: 'success', text: `${deletedName} was deleted, along with their attendance records.` })
+    }
   }
 
   useEffect(() => {
@@ -355,9 +395,22 @@ function App() {
                           <>
                             <span className="participant-name">{participant.name}</span>
                             <span className={`attendance-status ${statusClass}`}>{status}</span>
-                            <button className="edit-button" type="button" onClick={() => startEditing(participant)}>
-                              Edit
-                            </button>
+                            <div className="participant-actions">
+                              <button className="edit-button" type="button" onClick={() => startEditing(participant)}>
+                                Edit
+                              </button>
+                              <button
+                                className="delete-button"
+                                type="button"
+                                onClick={() => {
+                                  setDeleteMessage(null)
+                                  setDeleteTarget(participant)
+                                }}
+                                disabled={deletingParticipant}
+                              >
+                                Delete
+                              </button>
+                            </div>
                           </>
                         )}
                       </li>
@@ -370,9 +423,49 @@ function App() {
                   {editMessage.text}
                 </p>
               )}
+              {deleteMessage && (
+                <p className={deleteMessage.type} role={deleteMessage.type === 'error' ? 'alert' : 'status'}>
+                  {deleteMessage.text}
+                </p>
+              )}
             </>
           )}
         </section>
+      )}
+
+      {deleteTarget && (
+        <div className="dialog-backdrop" role="presentation">
+          <section
+            className="confirmation-dialog"
+            role="alertdialog"
+            aria-modal="true"
+            aria-labelledby="delete-dialog-title"
+            aria-describedby="delete-dialog-message"
+          >
+            <h2 id="delete-dialog-title">Delete {deleteTarget.name}?</h2>
+            <p id="delete-dialog-message">
+              This permanently deletes this participant and all of their attendance records. This cannot be undone.
+            </p>
+            <div className="dialog-actions">
+              <button
+                className="cancel-button"
+                type="button"
+                onClick={() => setDeleteTarget(null)}
+                disabled={deletingParticipant}
+              >
+                Cancel
+              </button>
+              <button
+                className="delete-button"
+                type="button"
+                onClick={handleDeleteParticipant}
+                disabled={deletingParticipant}
+              >
+                {deletingParticipant ? 'Deleting…' : 'Delete'}
+              </button>
+            </div>
+          </section>
+        </div>
       )}
     </main>
   )

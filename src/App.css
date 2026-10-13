@@ -273,6 +273,93 @@
   cursor: pointer;
 }
 
+.participant-actions {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 7px;
+}
+
+.delete-button {
+  min-height: 34px;
+  padding: 5px 11px;
+  border: 1px solid #e0bcbc;
+  border-radius: 7px;
+  background: #fff;
+  color: #8b3838;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.delete-button:hover:not(:disabled) {
+  background: #fff1f0;
+}
+
+.delete-button:focus-visible {
+  outline: 3px solid #e9aaaa;
+  outline-offset: 2px;
+}
+
+.delete-button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.dialog-backdrop {
+  position: fixed;
+  z-index: 10;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgb(20 30 22 / 48%);
+}
+
+.confirmation-dialog {
+  width: min(100%, 440px);
+  padding: 24px;
+  border: 1px solid #e2e8e2;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 18px 48px rgb(20 30 22 / 20%);
+}
+
+.confirmation-dialog h2 {
+  margin: 0 0 12px;
+  color: #202b23;
+  font-size: 1.3rem;
+}
+
+.confirmation-dialog p {
+  color: #515e54;
+  line-height: 1.55;
+}
+
+.dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 9px;
+  margin-top: 24px;
+}
+
+.dialog-actions .delete-button,
+.dialog-actions .cancel-button {
+  min-height: 40px;
+  padding-inline: 15px;
+  font-size: 0.9rem;
+}
+
+.dialog-actions .delete-button {
+  border-color: #9f3939;
+  background: #9f3939;
+  color: #fff;
+}
+
+.dialog-actions .delete-button:hover:not(:disabled) {
+  background: #842d2d;
+}
+
 .edit-button:hover,
 .cancel-button:hover:not(:disabled) {
   background: #edf4ee;
