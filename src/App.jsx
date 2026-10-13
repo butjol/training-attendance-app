@@ -27,6 +27,8 @@ function App() {
   const [groupsError, setGroupsError] = useState(null)
   const [participantsError, setParticipantsError] = useState(null)
   const [attendanceError, setAttendanceError] = useState(null)
+  const [savingAttendance, setSavingAttendance] = useState({})
+  const [attendanceSaveMessages, setAttendanceSaveMessages] = useState({})
 
   useEffect(() => {
     async function loadGroups() {
@@ -201,6 +203,69 @@ function App() {
     }
   }
 
+  async function handleAttendanceChange(participantId, nextStatus) {
+    if (savingAttendance[participantId]) return
+
+    const existingRecord = attendance.find((record) => record.participant_id === participantId)
+    if (
+      (nextStatus === 'not-recorded' && !existingRecord) ||
+      (nextStatus === 'present' && existingRecord?.present === true) ||
+      (nextStatus === 'absent' && existingRecord?.present === false)
+    ) return
+
+    setSavingAttendance((current) => ({ ...current, [participantId]: true }))
+    setAttendanceSaveMessages((current) => ({ ...current, [participantId]: null }))
+
+    let error
+    if (nextStatus === 'not-recorded') {
+      ({ error } = await supabase
+        .from('attendance')
+        .delete()
+        .eq('participant_id', participantId)
+        .eq('session_date', sessionDate))
+    } else {
+      ({ error } = await supabase
+        .from('attendance')
+        .upsert({
+          participant_id: participantId,
+          session_date: sessionDate,
+          present: nextStatus === 'present',
+        }, { onConflict: 'participant_id,session_date' }))
+    }
+
+    if (error) {
+      setAttendanceSaveMessages((current) => ({
+        ...current,
+        [participantId]: { type: 'error', text: `Couldn’t save attendance: ${error.message}` },
+      }))
+      setSavingAttendance((current) => ({ ...current, [participantId]: false }))
+      return
+    }
+
+    const { data, error: refreshError } = await supabase
+      .from('attendance')
+      .select('participant_id, present')
+      .in('participant_id', participants.map((participant) => participant.id))
+      .eq('session_date', sessionDate)
+
+    if (refreshError) {
+      setAttendanceSaveMessages((current) => ({
+        ...current,
+        [participantId]: { type: 'error', text: `Attendance saved, but refresh failed: ${refreshError.message}` },
+      }))
+      setAttendanceError(refreshError.message)
+    } else {
+      setAttendance(data ?? [])
+      setAttendanceSaveMessages((current) => ({
+        ...current,
+        [participantId]: { type: 'success', text: 'Attendance saved.' },
+      }))
+      setAttendanceError(null)
+    }
+
+    setSavingAttendance((current) => ({ ...current, [participantId]: false }))
+  }
+
   useEffect(() => {
     if (!selectedGroup || participantsLoading || participantsError || !sessionDate) return
 
@@ -354,8 +419,7 @@ function App() {
                 <ul className="participant-list attendance-list">
                   {participants.map((participant) => {
                     const record = attendance.find((item) => item.participant_id === participant.id)
-                    const status = record ? (record.present ? 'Present' : 'Absent') : 'Not recorded'
-                    const statusClass = status.toLowerCase().replace(' ', '-')
+                    const status = record ? (record.present ? 'present' : 'absent') : 'not-recorded'
 
                     return (
                       <li key={participant.id}>
@@ -394,7 +458,20 @@ function App() {
                         ) : (
                           <>
                             <span className="participant-name">{participant.name}</span>
-                            <span className={`attendance-status ${statusClass}`}>{status}</span>
+                            <label className="attendance-control">
+                              <span className="sr-only">Attendance for {participant.name}</span>
+                              <select
+                                value={status}
+                                onChange={(event) => handleAttendanceChange(participant.id, event.target.value)}
+                                disabled={savingAttendance[participant.id]}
+                                aria-label={`Attendance for ${participant.name}`}
+                              >
+                                <option value="present">Present</option>
+                                <option value="absent">Absent</option>
+                                <option value="not-recorded">Not recorded</option>
+                              </select>
+                              {savingAttendance[participant.id] && <span className="saving-label">Saving…</span>}
+                            </label>
                             <div className="participant-actions">
                               <button className="edit-button" type="button" onClick={() => startEditing(participant)}>
                                 Edit
@@ -412,6 +489,11 @@ function App() {
                               </button>
                             </div>
                           </>
+                        )}
+                        {attendanceSaveMessages[participant.id] && (
+                          <span className={`attendance-feedback ${attendanceSaveMessages[participant.id].type}`} role={attendanceSaveMessages[participant.id].type === 'error' ? 'alert' : 'status'}>
+                            {attendanceSaveMessages[participant.id].text}
+                          </span>
                         )}
                       </li>
                     )

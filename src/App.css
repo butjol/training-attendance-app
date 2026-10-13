@@ -236,12 +236,55 @@
   flex: 1 1 auto;
 }
 
-.attendance-status {
+.attendance-control {
+  display: flex;
+  flex: 0 1 180px;
+  align-items: center;
+  gap: 8px;
+}
+
+.attendance-control select {
+  width: 100%;
+  min-height: 36px;
+  padding: 5px 9px;
+  border: 1px solid #cfdacf;
+  border-radius: 7px;
+  background: #fff;
+  color: #355b3d;
+  font: inherit;
+  font-size: 0.84rem;
+  font-weight: 650;
+}
+
+.attendance-control select:focus-visible {
+  outline: 3px solid #a8c4ac;
+  outline-offset: 2px;
+}
+
+.attendance-control select:disabled {
+  opacity: 0.6;
+}
+
+.saving-label {
   flex: 0 0 auto;
-  padding: 4px 9px;
-  border-radius: 999px;
+  color: #617266;
   font-size: 0.78rem;
-  font-weight: 700;
+}
+
+.attendance-feedback {
+  flex: 1 0 100%;
+  font-size: 0.78rem;
+}
+
+.attendance-feedback.error {
+  padding: 4px 7px;
+  border-radius: 5px;
+}
+
+.attendance-feedback.success {
+  margin: 0;
+  padding: 4px 7px;
+  border-radius: 5px;
 }
 
 .attendance-status.present {
@@ -413,6 +456,18 @@
 .cancel-button:disabled {
   opacity: 0.55;
   cursor: not-allowed;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 .status,
