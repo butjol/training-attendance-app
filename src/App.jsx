@@ -13,6 +13,11 @@ function App() {
   const [participantPhone, setParticipantPhone] = useState('')
   const [savingParticipant, setSavingParticipant] = useState(false)
   const [participantSaveMessage, setParticipantSaveMessage] = useState(null)
+  const [editingParticipantId, setEditingParticipantId] = useState(null)
+  const [editingName, setEditingName] = useState('')
+  const [editingPhone, setEditingPhone] = useState('')
+  const [savingEdit, setSavingEdit] = useState(false)
+  const [editMessage, setEditMessage] = useState(null)
   const [groupsLoading, setGroupsLoading] = useState(true)
   const [participantsLoading, setParticipantsLoading] = useState(false)
   const [attendanceLoading, setAttendanceLoading] = useState(false)
@@ -48,7 +53,7 @@ function App() {
 
       const { data, error } = await supabase
         .from('participants')
-        .select('id, name')
+        .select('id, name, phone')
         .eq('group_id', selectedGroup.id)
 
       if (!isCurrent) return
@@ -95,7 +100,7 @@ function App() {
 
     const { data, error: refreshError } = await supabase
       .from('participants')
-      .select('id, name')
+      .select('id, name, phone')
       .eq('group_id', selectedGroup.id)
 
     if (refreshError) {
@@ -103,6 +108,57 @@ function App() {
     } else {
       setParticipants(data ?? [])
     }
+  }
+
+  function startEditing(participant) {
+    setEditingParticipantId(participant.id)
+    setEditingName(participant.name)
+    setEditingPhone(participant.phone ?? '')
+    setEditMessage(null)
+  }
+
+  function cancelEditing() {
+    setEditingParticipantId(null)
+    setEditingName('')
+    setEditingPhone('')
+    setEditMessage(null)
+  }
+
+  async function handleUpdateParticipant(event, participantId) {
+    event.preventDefault()
+    if (savingEdit || !editingName.trim()) return
+
+    setSavingEdit(true)
+    setEditMessage(null)
+
+    const { error } = await supabase
+      .from('participants')
+      .update({ name: editingName.trim(), phone: editingPhone.trim() || null })
+      .eq('id', participantId)
+
+    if (error) {
+      setEditMessage({ type: 'error', text: `Couldn’t update participant: ${error.message}` })
+      setSavingEdit(false)
+      return
+    }
+
+    const { data, error: refreshError } = await supabase
+      .from('participants')
+      .select('id, name, phone')
+      .eq('group_id', selectedGroup.id)
+
+    if (refreshError) {
+      setParticipantsError(refreshError.message)
+      setEditMessage({ type: 'error', text: `Participant updated, but the list could not refresh: ${refreshError.message}` })
+    } else {
+      setParticipants(data ?? [])
+      setEditMessage({ type: 'success', text: 'Participant updated successfully.' })
+    }
+
+    setEditingParticipantId(null)
+    setEditingName('')
+    setEditingPhone('')
+    setSavingEdit(false)
   }
 
   useEffect(() => {
@@ -263,12 +319,56 @@ function App() {
 
                     return (
                       <li key={participant.id}>
-                        <span>{participant.name}</span>
-                        <span className={`attendance-status ${statusClass}`}>{status}</span>
+                        {editingParticipantId === participant.id ? (
+                          <form className="edit-participant-form" onSubmit={(event) => handleUpdateParticipant(event, participant.id)}>
+                            <label>
+                              Name
+                              <input
+                                type="text"
+                                value={editingName}
+                                onChange={(event) => setEditingName(event.target.value)}
+                                required
+                                maxLength={120}
+                                autoFocus
+                                disabled={savingEdit}
+                              />
+                            </label>
+                            <label>
+                              Phone <span className="optional-label">(optional)</span>
+                              <input
+                                type="tel"
+                                value={editingPhone}
+                                onChange={(event) => setEditingPhone(event.target.value)}
+                                disabled={savingEdit}
+                              />
+                            </label>
+                            <div className="edit-actions">
+                              <button className="submit-button" type="submit" disabled={savingEdit || !editingName.trim()}>
+                                {savingEdit ? 'Saving…' : 'Save'}
+                              </button>
+                              <button className="cancel-button" type="button" onClick={cancelEditing} disabled={savingEdit}>
+                                Cancel
+                              </button>
+                            </div>
+                          </form>
+                        ) : (
+                          <>
+                            <span className="participant-name">{participant.name}</span>
+                            <span className={`attendance-status ${statusClass}`}>{status}</span>
+                            <button className="edit-button" type="button" onClick={() => startEditing(participant)}>
+                              Edit
+                            </button>
+                          </>
+                        )}
                       </li>
                     )
                   })}
                 </ul>
+              )}
+              {editMessage && (
+                <p className={editMessage.type} role={editMessage.type === 'error' ? 'alert' : 'status'}>
+                  {editMessage.text}
+                </p>
               )}
             </>
           )}

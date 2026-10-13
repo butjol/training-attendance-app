@@ -229,6 +229,11 @@
   align-items: center;
   justify-content: space-between;
   gap: 12px;
+  flex-wrap: wrap;
+}
+
+.participant-name {
+  flex: 1 1 auto;
 }
 
 .attendance-status {
@@ -252,6 +257,75 @@
 .attendance-status.not-recorded {
   color: #6b5b2c;
   background: #f5f0dc;
+}
+
+.edit-button,
+.cancel-button {
+  min-height: 34px;
+  padding: 5px 11px;
+  border: 1px solid #cfdacf;
+  border-radius: 7px;
+  background: #fff;
+  color: #355b3d;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.edit-button:hover,
+.cancel-button:hover:not(:disabled) {
+  background: #edf4ee;
+}
+
+.edit-participant-form {
+  display: grid;
+  grid-template-columns: minmax(130px, 1fr) minmax(130px, 1fr) auto;
+  align-items: end;
+  gap: 10px;
+  width: 100%;
+}
+
+.edit-participant-form label {
+  display: grid;
+  gap: 5px;
+  color: #46564a;
+  font-size: 0.82rem;
+  font-weight: 650;
+}
+
+.edit-participant-form input {
+  width: 100%;
+  min-height: 38px;
+  padding: 7px 9px;
+  border: 1px solid #cfdacf;
+  border-radius: 7px;
+  background: #fff;
+  color: #202b23;
+  font: inherit;
+}
+
+.edit-participant-form input:focus-visible,
+.edit-button:focus-visible,
+.cancel-button:focus-visible {
+  outline: 3px solid #a8c4ac;
+  outline-offset: 2px;
+}
+
+.edit-actions {
+  display: flex;
+  gap: 7px;
+}
+
+.edit-actions .submit-button {
+  min-height: 36px;
+  padding: 5px 11px;
+  font-size: 0.82rem;
+}
+
+.cancel-button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
 }
 
 .status,
@@ -292,5 +366,13 @@
 
   .submit-button {
     width: 100%;
+  }
+
+  .edit-participant-form {
+    grid-template-columns: 1fr;
+  }
+
+  .edit-actions .submit-button {
+    width: auto;
   }
 }
