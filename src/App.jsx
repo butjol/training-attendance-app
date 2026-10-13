@@ -3,13 +3,18 @@ import { supabase } from './supabaseClient'
 import './App.css'
 
 function App() {
+  const initialSessionDate = '2026-10-12'
   const [groups, setGroups] = useState([])
   const [selectedGroup, setSelectedGroup] = useState(null)
   const [participants, setParticipants] = useState([])
+  const [sessionDate, setSessionDate] = useState(initialSessionDate)
+  const [attendance, setAttendance] = useState([])
   const [groupsLoading, setGroupsLoading] = useState(true)
   const [participantsLoading, setParticipantsLoading] = useState(false)
+  const [attendanceLoading, setAttendanceLoading] = useState(false)
   const [groupsError, setGroupsError] = useState(null)
   const [participantsError, setParticipantsError] = useState(null)
+  const [attendanceError, setAttendanceError] = useState(null)
 
   useEffect(() => {
     async function loadGroups() {
@@ -60,12 +65,52 @@ function App() {
     }
   }, [selectedGroup])
 
+  useEffect(() => {
+    if (!selectedGroup || participantsLoading || participantsError || !sessionDate) return
+
+    let isCurrent = true
+
+    async function loadAttendance() {
+      setAttendanceLoading(true)
+      setAttendanceError(null)
+      setAttendance([])
+
+      const participantIds = participants.map((participant) => participant.id)
+      if (participantIds.length === 0) {
+        setAttendanceLoading(false)
+        return
+      }
+
+      const { data, error } = await supabase
+        .from('attendance')
+        .select('participant_id, present')
+        .in('participant_id', participantIds)
+        .eq('session_date', sessionDate)
+
+      if (!isCurrent) return
+
+      if (error) {
+        setAttendanceError(error.message)
+      } else {
+        setAttendance(data ?? [])
+      }
+
+      setAttendanceLoading(false)
+    }
+
+    loadAttendance()
+
+    return () => {
+      isCurrent = false
+    }
+  }, [selectedGroup, sessionDate, participants, participantsLoading, participantsError])
+
   return (
     <main className="app-shell">
       <header className="page-header">
         <p className="eyebrow">Training attendance</p>
-        <h1>Choose a training group</h1>
-        <p className="intro">Select a group to see its participants.</p>
+        <h1>Training attendance</h1>
+        <p className="intro">Select a group and session date to view attendance.</p>
       </header>
 
       <section aria-labelledby="groups-heading" className="groups-section">
@@ -105,6 +150,16 @@ function App() {
             </div>
           </div>
 
+          <div className="session-controls">
+            <label htmlFor="session-date">Session date</label>
+            <input
+              id="session-date"
+              type="date"
+              value={sessionDate}
+              onChange={(event) => setSessionDate(event.target.value)}
+            />
+          </div>
+
           {participantsLoading && <p className="status" role="status">Loading participants…</p>}
           {participantsError && <p className="error" role="alert">Couldn’t load participants: {participantsError}</p>}
 
@@ -113,11 +168,26 @@ function App() {
           )}
 
           {!participantsLoading && !participantsError && participants.length > 0 && (
-            <ul className="participant-list">
-              {participants.map((participant) => (
-                <li key={participant.id}>{participant.name}</li>
-              ))}
-            </ul>
+            <>
+              {attendanceLoading && <p className="status" role="status">Loading attendance…</p>}
+              {attendanceError && <p className="error" role="alert">Couldn’t load attendance: {attendanceError}</p>}
+              {!attendanceLoading && !attendanceError && (
+                <ul className="participant-list attendance-list">
+                  {participants.map((participant) => {
+                    const record = attendance.find((item) => item.participant_id === participant.id)
+                    const status = record ? (record.present ? 'Present' : 'Absent') : 'Not recorded'
+                    const statusClass = status.toLowerCase().replace(' ', '-')
+
+                    return (
+                      <li key={participant.id}>
+                        <span>{participant.name}</span>
+                        <span className={`attendance-status ${statusClass}`}>{status}</span>
+                      </li>
+                    )
+                  })}
+                </ul>
+              )}
+            </>
           )}
         </section>
       )}

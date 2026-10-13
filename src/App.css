@@ -37,6 +37,35 @@
   font-weight: 650;
 }
 
+.session-controls {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px 14px;
+  margin: 0 0 22px;
+}
+
+.session-controls label {
+  color: #46564a;
+  font-size: 0.92rem;
+  font-weight: 650;
+}
+
+.session-controls input {
+  min-height: 42px;
+  padding: 8px 11px;
+  border: 1px solid #cfdacf;
+  border-radius: 8px;
+  background: #fff;
+  color: #202b23;
+  font: inherit;
+}
+
+.session-controls input:focus-visible {
+  outline: 3px solid #a8c4ac;
+  outline-offset: 2px;
+}
+
 .group-list {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr));
@@ -111,6 +140,36 @@
   border: 1px solid #e2e8e2;
   border-radius: 9px;
   background: #fbfcfb;
+}
+
+.attendance-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.attendance-status {
+  flex: 0 0 auto;
+  padding: 4px 9px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.attendance-status.present {
+  color: #28613a;
+  background: #e3f3e7;
+}
+
+.attendance-status.absent {
+  color: #8b3838;
+  background: #fae9e8;
+}
+
+.attendance-status.not-recorded {
+  color: #6b5b2c;
+  background: #f5f0dc;
 }
 
 .status,
