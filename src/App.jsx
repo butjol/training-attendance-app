@@ -9,6 +9,10 @@ function App() {
   const [participants, setParticipants] = useState([])
   const [sessionDate, setSessionDate] = useState(initialSessionDate)
   const [attendance, setAttendance] = useState([])
+  const [participantName, setParticipantName] = useState('')
+  const [participantPhone, setParticipantPhone] = useState('')
+  const [savingParticipant, setSavingParticipant] = useState(false)
+  const [participantSaveMessage, setParticipantSaveMessage] = useState(null)
   const [groupsLoading, setGroupsLoading] = useState(true)
   const [participantsLoading, setParticipantsLoading] = useState(false)
   const [attendanceLoading, setAttendanceLoading] = useState(false)
@@ -64,6 +68,42 @@ function App() {
       isCurrent = false
     }
   }, [selectedGroup])
+
+  async function handleAddParticipant(event) {
+    event.preventDefault()
+    if (savingParticipant || !selectedGroup || participants.length >= 6) return
+
+    setSavingParticipant(true)
+    setParticipantSaveMessage(null)
+
+    const { error } = await supabase.from('participants').insert({
+      name: participantName.trim(),
+      phone: participantPhone.trim() || null,
+      group_id: selectedGroup.id,
+    })
+
+    if (error) {
+      setParticipantSaveMessage({ type: 'error', text: `Couldn’t add participant: ${error.message}` })
+      setSavingParticipant(false)
+      return
+    }
+
+    setParticipantName('')
+    setParticipantPhone('')
+    setParticipantSaveMessage({ type: 'success', text: 'Participant added successfully.' })
+    setSavingParticipant(false)
+
+    const { data, error: refreshError } = await supabase
+      .from('participants')
+      .select('id, name')
+      .eq('group_id', selectedGroup.id)
+
+    if (refreshError) {
+      setParticipantsError(refreshError.message)
+    } else {
+      setParticipants(data ?? [])
+    }
+  }
 
   useEffect(() => {
     if (!selectedGroup || participantsLoading || participantsError || !sessionDate) return
@@ -159,6 +199,49 @@ function App() {
               onChange={(event) => setSessionDate(event.target.value)}
             />
           </div>
+
+          <form className="participant-form" onSubmit={handleAddParticipant}>
+            <h3>Add a participant</h3>
+            <div className="form-fields">
+              <label>
+                Name
+                <input
+                  type="text"
+                  value={participantName}
+                  onChange={(event) => setParticipantName(event.target.value)}
+                  required
+                  maxLength={120}
+                  autoComplete="name"
+                  disabled={savingParticipant || participants.length >= 6}
+                />
+              </label>
+              <label>
+                Phone <span className="optional-label">(optional)</span>
+                <input
+                  type="tel"
+                  value={participantPhone}
+                  onChange={(event) => setParticipantPhone(event.target.value)}
+                  autoComplete="tel"
+                  disabled={savingParticipant || participants.length >= 6}
+                />
+              </label>
+              <button
+                className="submit-button"
+                type="submit"
+                disabled={savingParticipant || participants.length >= 6 || !participantName.trim()}
+              >
+                {savingParticipant ? 'Saving…' : 'Add participant'}
+              </button>
+            </div>
+            {participants.length >= 6 && (
+              <p className="status">This group has reached its limit of 6 participants.</p>
+            )}
+            {participantSaveMessage && (
+              <p className={participantSaveMessage.type} role={participantSaveMessage.type === 'error' ? 'alert' : 'status'}>
+                {participantSaveMessage.text}
+              </p>
+            )}
+          </form>
 
           {participantsLoading && <p className="status" role="status">Loading participants…</p>}
           {participantsError && <p className="error" role="alert">Couldn’t load participants: {participantsError}</p>}
