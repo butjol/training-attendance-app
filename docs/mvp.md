@@ -1,10 +1,10 @@
-# Training Attendance App – MVP Specification
+﻿# Training Attendance App - MVP Specification
 
 ## 1. MVP Goal
 
-Build a simple web application that helps an independent fitness trainer manage training groups, participants and attendance.
+Build a simple web application that helps an independent fitness trainer manage two training groups, participants and attendance.
 
-The application will use React, Vite, CSS and Supabase.
+The application will use React, Vite, CSS and Supabase. Its database contains three tables: `groups`, `participants` and `attendance`. Trainer authentication is managed separately through Supabase Auth.
 
 The first MVP version supports one user role: Trainer.
 
@@ -14,7 +14,7 @@ The first MVP version supports one user role: Trainer.
 
 **Priority: Must have**
 
-The trainer can securely sign in and sign out.
+The trainer can securely sign in and sign out using Supabase Auth.
 
 **Acceptance Criteria**
 - The trainer can sign in using email and password.
@@ -22,99 +22,65 @@ The trainer can securely sign in and sign out.
 - Unauthenticated users cannot access protected application data.
 - The trainer can sign out.
 
-### FR-02: Participant Management
+### FR-02: Training Groups
 
 **Priority: Must have**
 
-The trainer can manage participant records.
-
-**Acceptance Criteria**
-- The trainer can add a participant with a name and phone number.
-- The trainer can view the participant list.
-- The trainer can edit participant details.
-- The trainer can delete a participant after confirmation.
-- A participant's name is required.
-- Participant data is stored in Supabase.
-
-### FR-03: Training Group Management
-
-**Priority: Must have**
-
-The trainer can manage two recurring training groups:
+The trainer can view the two predefined training groups:
 
 - Monday / Wednesday
 - Tuesday / Thursday
 
-Each group has a maximum capacity of six participants.
+Groups are predefined and are not managed as editable records in the MVP.
 
 **Acceptance Criteria**
-- The trainer can view both groups.
-- The trainer can assign participants to a group.
-- The trainer can remove participants from a group.
-- A group cannot contain more than six participants.
-- The application displays the participants assigned to each group.
-- Group assignments are stored in Supabase.
+- Both predefined groups are available in the application.
+- The trainer can view each group and the participants assigned to it.
+- Each group can contain no more than six participants.
+- Group capacity is enforced when creating or editing participant assignments.
 
-### FR-04: Attendance Tracking
+### FR-03: Participant Management
 
 **Priority: Must have**
 
-The trainer can record attendance for training sessions.
+The trainer can create and manage participant records, assigning each participant to exactly one training group.
 
 **Acceptance Criteria**
-- The trainer can select a training group and session date.
-- The application displays participants assigned to the selected group.
-- The trainer can mark each participant as Present or Absent.
-- The trainer can save attendance records.
-- The trainer can view and correct previously saved attendance records.
-- Attendance records are stored in Supabase.
+- The trainer can create a participant with a required name, optional phone number and one group assignment.
+- The trainer can view the participant list and each participant's group.
+- The trainer can edit participant details and change the group assignment.
+- The trainer can delete a participant after confirmation.
+- Each participant belongs to exactly one group at all times.
+- A group assignment cannot be created or changed if it would exceed that group's capacity of six.
+- Participant and group assignment data is stored in Supabase.
 
-### FR-05: Membership Management
+### FR-04: Attendance Management
 
-**Priority: Should have**
+**Priority: Must have**
 
-The trainer can register a participant's membership.
-
-Available membership types:
-
-| Membership | Duration | Price |
-|---|---|---|
-| Standard | 4 weeks | €110 |
-| Extended | 8 weeks | €200 |
+The trainer can create and manage attendance records for individual participants and dates.
 
 **Acceptance Criteria**
-- The trainer can select a participant and membership type.
-- The trainer can enter the membership start date, corresponding to the first training session.
-- The application calculates the end date based on membership duration.
-- The trainer can view and update membership details.
-- Membership data is stored in Supabase.
-
-Automatic calculation of remaining training sessions is excluded from the MVP.
-
-### FR-06: Payment Tracking
-
-**Priority: Should have**
-
-The trainer can record payments associated with memberships.
-
-**Acceptance Criteria**
-- The trainer can record a payment amount and date.
-- The trainer can associate a payment with a participant's membership.
-- The trainer can view recorded payments.
-- The trainer can correct or delete an incorrect payment record.
-- Payment data is stored in Supabase.
+- The trainer can create an attendance record for a participant and session date, marking the participant Present or Absent.
+- The trainer can view attendance records by participant and date.
+- The trainer can edit an existing attendance record, including its date and attendance status.
+- The trainer can delete an attendance record.
+- A participant can have no more than one attendance record for the same date.
+- Attendance data is stored in Supabase.
 
 ## 3. Out of Scope
 
-The following features are excluded from the first MVP:
+The following features are excluded from the MVP:
 
-- Participant accounts and self-service.
-- Automatic SMS or email notifications.
-- Online payment processing.
+- Membership management.
+- Payment tracking or online payment processing.
 - Replacement sessions in other groups.
+- Automatic SMS, email or other notifications.
+- Participant accounts and self-service.
 - Automatic calculation of remaining sessions.
 - Advanced reporting and analytics.
 - External calendar integrations.
+- Creating, editing or deleting training groups; the two groups are predefined.
 
 ## 4. Non-Functional Requirements
 
@@ -130,21 +96,21 @@ The following features are excluded from the first MVP:
 - Real participant data must not be used in public documentation or screenshots.
 
 ### Data Management
-- Application data will be stored in Supabase.
-- Required CRUD operations will be implemented for core entities.
+- Application data will be stored in Supabase using the `groups`, `participants` and `attendance` tables.
+- Required create, read, update and delete operations will be implemented for participants and attendance records.
 - The application should handle loading, success and error states.
 
 ## 5. MVP Completion Criteria
 
 The MVP is considered complete when:
 
-- The trainer can securely sign in.
-- Participants can be created, viewed, edited and deleted.
-- Participants can be assigned to the two training groups.
-- Group capacity is limited to six participants.
-- Attendance can be recorded, viewed and corrected.
-- Data persists in Supabase after page refresh.
-- Protected data cannot be accessed without authentication.
-- The application is deployed and accessible through a public URL.
-
-Membership and payment functionality will be implemented after the core features, if time permits.
+- The trainer can securely sign in and sign out using Supabase Auth.
+- Unauthenticated users cannot access protected application data.
+- The trainer can view the two predefined groups: Monday / Wednesday and Tuesday / Thursday.
+- The trainer can create, view, edit and delete participants.
+- Every participant is assigned to exactly one group.
+- Neither group can exceed six participants, including when a participant is created or reassigned.
+- The trainer can create, view, edit and delete attendance records by participant and date.
+- The application prevents duplicate attendance records for the same participant and date.
+- Participant and attendance data persists in Supabase after page refresh.
+- The application uses only the three MVP data tables: `groups`, `participants` and `attendance`; trainer credentials are managed by Supabase Auth.
